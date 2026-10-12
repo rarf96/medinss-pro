@@ -52,9 +52,15 @@ workflow: detection only, no rewrite.
    save/send prompt with a reason is fine).
 8. Any paragraph with 3+ vocabulary / grammar markers, or any
    negative-parallelism / "The result?" reveal bridge (see
-   `../references/scrub-rules.md`).
+   `../references/scrub-rules.md`; for Portuguese text,
+   `../references/scrub-rules-pt-br.md`).
 9. Carousel mixes images and video, or has more than 10 slides.
 10. No media plan (Instagram rejects text-only posts).
+10a. MedINSS compliance: any Blocker in `../../../references/compliance-medinss.md`
+    fails (promised result, figure without estimate label and premise,
+    unconsented testimonial, personal data in an image, government or
+    medical-council branding, false urgency, OAB rules when a law firm is
+    involved). Report its Alerts as Warnings.
 
 ### Warnings (flag with a suggested fix)
 

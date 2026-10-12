@@ -26,6 +26,10 @@ use one); forced rhythm is a tell.
       "The result?" reveal bridge.
 - [ ] Carousel: all images or all video (no mixed media), 2-10 slides.
 - [ ] A media plan exists (Instagram rejects text-only posts).
+- [ ] MedINSS: every Blocker in `../../../references/compliance-medinss.md`
+      passes (no promised result, every figure labelled as an estimate with its
+      premise, no unconsented testimonial, no personal data in images, no
+      government or medical-council branding, no false urgency).
 
 ## Warnings (flag with fix)
 

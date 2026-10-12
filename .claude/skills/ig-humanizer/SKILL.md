@@ -112,7 +112,8 @@ ig-humanizer --mode profile
 
 ### Pass 1 - SCRUB (score, then delete or replace)
 
-Apply the tiered catalogs in `references/scrub-rules.md`. The unit of
+Apply the tiered catalogs in `references/scrub-rules.md` (for Portuguese text,
+use the vocabulary lists in `references/scrub-rules-pt-br.md` instead). The unit of
 judgement is the **paragraph (or slide), not the word**: count markers per
 paragraph, rewrite the paragraph at 3+, leave a single marker alone unless it
 is a reveal bridge, negative parallelism, a sincerity marker, or forensic
@@ -274,6 +275,8 @@ See `references/examples.md` for worked before/after rewrites.
 - `references/examples.md` - worked before/after rewrites for captions and slides
 - `references/audit-checklist.md` - the pre-publish checklist with thresholds
 - `sub-skills/post-audit.md` - pre-publish audit workflow (detection-only, no rewrite)
+- `references/scrub-rules-pt-br.md` - Brazilian Portuguese vocabulary, phrases and grammar tells (MedINSS)
+- `../../references/compliance-medinss.md` - MedINSS advertising compliance rules (blockers enforced in audit mode)
 - `sub-skills/voice-profile.md` - build/update the user's Voice & Brand Profile (`--mode profile`)
 - `sub-skills/illustration.md` - optional Pixfaro image workflow
 
