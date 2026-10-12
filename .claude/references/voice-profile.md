@@ -10,7 +10,7 @@ ignored.
 ## Status
 
 - filled: yes
-- source: Reel do fundador de 28/09/2026 (`exemplos-medfis/reel-2026-09-28-teto-inss.md`) + texto da plataforma MedINSS Pro. Cores aproximadas do vídeo; substituir pelos valores do manual de marca da MEDFIS.
+- source: Reel do fundador de 28/09/2026 (`exemplos-medfis/reel-2026-09-28-teto-inss.md`), Manual de Identidade Visual MEDFIS v1.0 e texto da plataforma MedINSS Pro.
 - updated: 2026-10-12
 
 ## 1. Voice fingerprint
@@ -58,9 +58,12 @@ ignored.
 
 ## 6. Brand assets (for illustrations)
 
+Fonte oficial: `../brand/medfis/identidade-visual.md` (resumo do Manual de Identidade Visual MEDFIS v1.0).
+
 - Handle to stamp on images: @medfisbr
 - Tagline: Sua Saúde Financeira em Boas Mãos
-- Brand colors (aproximados do vídeo; confirmar no manual): verde-petróleo #037B69 (destaques, selos), amarelo #F4C651 (palavra-chave, CTA), azul-marinho #0D2C48 (fundo da cartela final), fundo claro #F6F8F8
-- Logo: wordmark "MEDFIS" com símbolo de linhas em M (arquivo PENDENTE do manual)
-- Overlay position: bottom-center (cartela final) / handle bottom-right nos slides
-- Visual style default: infográfico limpo em fundo claro com ícones circulares, títulos em caixa alta com sublinhado verde; legenda palavra a palavra com destaque verde/amarelo nos Reels
+- Brand color (hex): Teal Primário #1A7A7A; acentos Forest Green #2D5A5A; fundos #FFFFFF / #F5F5F5; texto #000000 e #999999
+- Fonts: Playfair Display (títulos), Inter (texto)
+- Logo: `../brand/medfis/medfis-logo-horizontal-fundo-claro.png` (transparente) e `medfis-logo-horizontal-fundo-escuro.png`
+- Overlay position: bottom-right
+- Visual style default: minimalista e sofisticado; fundo claro, título serifado teal, ícones de linha fina, linha teal como separador. Nos Reels, legenda palavra a palavra com destaque teal (o amarelo do Reel de 28/09 está fora do manual; usar só se a diretoria aprovar).

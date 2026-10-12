@@ -62,6 +62,32 @@ recuperação for conduzida por advogados, do Provimento OAB 205/2021.
 - **Dados de médicos em listas.** Prospecção que nasce do Instagram e vai ao
   WhatsApp precisa de base legal e opção de descadastro (LGPD).
 
+## Expressões vetadas (vistas em materiais MEDFIS anteriores)
+
+| Evite | Por quê | Use |
+|---|---|---|
+| "garantindo que você recupere seu dinheiro", "direitos garantidos" | promessa de resultado (Bloqueio 1) | "para pedir de volta o que foi pago a mais, se houver" |
+| "Resultados comprovados", "histórico de sucesso" | prova genérica sem dado; com advogado envolvido, vedado | um caso real anonimizado, com autorização e ressalva |
+| "Cálculo preciso do valor exato" | o valor final depende da Receita | "cálculo detalhado do valor estimado" |
+| "Não perca mais tempo!", "A cada mês você perde..." | urgência de pressão (Bloqueio 6) | o fato do prazo: "o pedido alcança os últimos 5 anos" |
+| "Médico, você está pagando INSS a mais?" **em anúncio pago** | atributo pessoal/financeiro (política Meta) | "Médicos com mais de um vínculo podem estar pagando INSS acima do teto" (no orgânico, a pergunta é aceitável) |
+| "otimizar suas contribuições", `#OtimizacaoFiscal` | soa como planejamento tributário/elisão, outro serviço | "recuperar o que foi pago acima do teto" |
+| "Processo 100% seguro" (valor do manual) | "100%" em peça pública lê como promessa | "processo dentro da lei, com acompanhamento em cada etapa" |
+
+## Pontos a alinhar internamente (validar com jurídico)
+
+- **Administrativo x judicial:** o material de marketing diz "pedido
+  administrativo, sem necessidade de ação judicial", mas a plataforma MedINSS
+  Pro pede "procuração — necessária para ação judicial". Definir qual caminho
+  é oferecido e falar só dele.
+- **"Junto ao INSS" x Receita Federal:** desde a Lei 11.457/2007 as
+  contribuições previdenciárias são administradas pela Receita Federal, e a
+  restituição costuma ser pedida a ela (PER/DCOMP). A própria plataforma
+  registra "Acompanhamento Receita Federal". Preferir "pedido de restituição
+  à Receita Federal" a "pedido junto ao INSS".
+- **Dados de contato do manual** (telefone, endereço) parecem
+  preenchimento-modelo; não usar em posts até confirmar.
+
 ## Frases-modelo seguras
 
 - "Médicos com 2 ou mais vínculos costumam contribuir acima do teto do INSS.
