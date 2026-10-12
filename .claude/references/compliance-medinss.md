@@ -1,4 +1,4 @@
-# Regras de conformidade — publicidade do MedINSS Pro
+# Regras de conformidade — publicidade da MEDFIS (@medfisbr) / MedINSS Pro
 
 Toda peça (legenda, slide, Reel, bio, anúncio) passa por esta lista antes de
 publicar. `ig-humanizer --mode audit` trata os itens de **Bloqueio** como falha
@@ -6,7 +6,7 @@ automática. Este arquivo resume regras públicas para orientar o rascunho; ele
 **não substitui a revisão do jurídico**, principalmente nos pontos marcados
 "validar com jurídico".
 
-Contexto: o MedINSS Pro oferece diagnóstico e recuperação de contribuição
+Contexto: a MEDFIS, por meio da plataforma MedINSS Pro, oferece diagnóstico e recuperação de contribuição
 previdenciária paga acima do teto por médicos com mais de um vínculo. O
 público são médicos; o produto é um serviço tributário/previdenciário, não um
 serviço médico. Por isso as regras que pesam são as do Código de Defesa do

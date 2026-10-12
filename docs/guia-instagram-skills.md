@@ -1,4 +1,4 @@
-# Guia rápido: skills de Instagram do MedINSS Pro
+# Guia rápido: skills de Instagram da MEDFIS (@medfisbr)
 
 As "skills" são manuais de instrução que o Claude segue automaticamente quando
 você pede algo de Instagram neste projeto. Você não precisa chamar nada pelo
@@ -22,9 +22,9 @@ nome: basta pedir em português, como pediria a um assistente de marketing.
 
 1. **Perfil de voz** (`.claude/references/voice-profile.md`): diz às skills
    quem é a marca, quem é o público (médicos com mais de um vínculo), os temas
-   e o tom. Está como **rascunho**: faltam o @ do perfil, o link da bio, a cor
-   da marca e 2-4 posts reais. Para completar, peça: "construa meu perfil de
-   voz" e cole alguns posts.
+   e o tom. Foi montado a partir do Reel do fundador de 28/09/2026 (transcrição
+   em `.claude/references/exemplos-medfis/`). Faltam o link da bio e as cores
+   e o logo oficiais do manual de marca (as cores atuais são aproximadas).
 2. **Regras de português** (`ig-humanizer/references/scrub-rules-pt-br.md`):
    lista de vícios de texto feito por IA em português ("no cenário atual",
    "potencializar", "vale ressaltar"...) e como corrigir.
