@@ -18,13 +18,13 @@ nome: basta pedir em português, como pediria a um assistente de marketing.
 | `ig-profile-optimizer` | Revisa o perfil: foto, nome, bio, link, destaques. | "Revise a bio do nosso Instagram." |
 | `ig-audience-insights` | Lê dados reais de hashtags e perfis (precisa da chave da Apify). | "O que está funcionando em #plantonista?" |
 
-## O que foi ajustado para o MedINSS Pro
+## O que foi ajustado para a MEDFIS
 
 1. **Perfil de voz** (`.claude/references/voice-profile.md`): diz às skills
    quem é a marca, quem é o público (médicos com mais de um vínculo), os temas
    e o tom. Foi montado a partir do Reel do fundador de 28/09/2026 (transcrição
-   em `.claude/references/exemplos-medfis/`). Faltam o link da bio e as cores
-   e o logo oficiais do manual de marca (as cores atuais são aproximadas).
+   em `.claude/references/exemplos-medfis/`) e do Manual de Identidade Visual
+   (cores, fontes e logos em `.claude/brand/medfis/`). Falta só o link da bio.
 2. **Regras de português** (`ig-humanizer/references/scrub-rules-pt-br.md`):
    lista de vícios de texto feito por IA em português ("no cenário atual",
    "potencializar", "vale ressaltar"...) e como corrigir.
@@ -33,6 +33,8 @@ nome: basta pedir em português, como pediria a um assistente de marketing.
    depoimento sem autorização, dado pessoal em print, logo do INSS/Receita,
    urgência falsa). A revisão final bloqueia o post se algo disso aparecer.
    Os pontos marcados "validar com jurídico" precisam do aval de vocês.
+4. **Posts prontos** (`docs/posts-revisados-medfis.md`): os 4 posts do
+   material de marketing reescritos na voz do fundador e dentro das regras.
 
 ## Fluxo recomendado para cada post
 
