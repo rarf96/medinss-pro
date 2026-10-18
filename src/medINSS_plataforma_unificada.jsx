@@ -297,7 +297,6 @@ function Login({ onLogin }) {
 
   return (
     <div style={{minHeight:"100vh", display:"flex", fontFamily:F}}>
-      <style>{GLOBAL_CSS}</style>
 
       {/* Painel esquerdo — identidade */}
       <div className="login-left" style={{
@@ -545,6 +544,26 @@ function Hub({ onLogout, onGo }) {
               {["Kanban","Contratos IA","Financeiro","NPS"].map((t,i)=>(
                 <Badge key={i} color={T.amber} bg={T.amberBg}>{t}</Badge>
               ))}
+            </div>
+          </div>
+
+          {/* Busca CNPJ */}
+          <div className="hov-card" onClick={()=>onGo("cnpj")}
+            style={{gridColumn:"1 / -1", background:T.surface, border:`1px solid ${T.border}`, borderRadius:6, padding:28, boxShadow:T.sh,
+              display:"flex", alignItems:"center", gap:24, flexWrap:"wrap"}}>
+            <div style={{flex:"1 1 320px"}}>
+              <div style={{fontSize:18, fontWeight:700, color:T.navy, letterSpacing:"-0.02em", marginBottom:8}}>
+                Busca CNPJ & WhatsApp
+              </div>
+              <div style={{fontSize:13, color:T.textLt, lineHeight:1.65}}>
+                Digite o CNPJ de uma clínica e veja os telefones do cadastro público ordenados pela chance de ter WhatsApp, com mensagem pronta e controle de quem pediu para sair.
+              </div>
+            </div>
+            <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center"}}>
+              {["Receita Federal","WhatsApp provável","LGPD"].map((t,i)=>(
+                <Badge key={i} color={T.wa} bg={T.wa+"14"}>{t}</Badge>
+              ))}
+              <div style={{fontSize:20, color:T.slateL, marginLeft:8}}>→</div>
             </div>
           </div>
         </div>
@@ -1360,16 +1379,301 @@ function CRM({ onBack }) {
 }
 
 /* ══════════════════════════════════════════════════════
+   BUSCA CNPJ — telefones com WhatsApp provável
+   Fontes públicas: BrasilAPI e CNPJ.ws (dados da Receita Federal).
+   Nota é estimativa: não consulta o WhatsApp (termos proíbem).
+══════════════════════════════════════════════════════ */
+const DDD_UF = {
+  SP:[11,12,13,14,15,16,17,18,19], RJ:[21,22,24], ES:[27,28], MG:[31,32,33,34,35,37,38],
+  PR:[41,42,43,44,45,46], SC:[47,48,49], RS:[51,53,54,55], DF:[61], GO:[62,64], TO:[63],
+  MT:[65,66], MS:[67], AC:[68], RO:[69], BA:[71,73,74,75,77], SE:[79], PE:[81,87], AL:[82],
+  PB:[83], RN:[84], CE:[85,88], PI:[86,89], PA:[91,93,94], AM:[92,97], RR:[95], AP:[96], MA:[98,99],
+};
+const SO_DIG  = (s) => String(s||"").replace(/\D/g,"");
+const maskCnpj = (s) => {
+  const d = SO_DIG(s).slice(0,14);
+  return d.replace(/^(\d{2})(\d)/,"$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/,"$1.$2.$3")
+          .replace(/\.(\d{3})(\d)/,".$1/$2").replace(/(\d{4})(\d)/,"$1-$2");
+};
+function cnpjValido(s) {
+  const d = SO_DIG(s);
+  if (d.length!==14 || /^(\d)\1+$/.test(d)) return false;
+  const dv = (n) => {
+    let soma=0, p=n-7;
+    for (let i=0;i<n;i++) { soma += +d[i]*p--; if (p<2) p=9; }
+    const r = soma%11; return r<2?0:11-r;
+  };
+  return dv(12)===+d[12] && dv(13)===+d[13];
+}
+/* Normaliza para DDD + número; celular antigo de 8 dígitos ganha o 9 */
+function normFone(raw) {
+  let d = SO_DIG(raw).replace(/^0+/,"");
+  if (d.startsWith("55") && d.length>=12) d = d.slice(2);
+  if (d.length===10 && /[6-9]/.test(d[2])) d = d.slice(0,2)+"9"+d.slice(2);
+  if (d.length!==10 && d.length!==11) return null;
+  return { num:d, ddd:+d.slice(0,2), cel: d.length===11 && d[2]==="9" };
+}
+const fmtFone = (d) => d.length===11
+  ? `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`
+  : `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+
+/* Junta as respostas das fontes num formato único */
+function lerBrasilApi(j) {
+  return {
+    cnpj: SO_DIG(j.cnpj), razao: j.razao_social, fantasia: j.nome_fantasia,
+    situacao: j.descricao_situacao_cadastral, abertura: j.data_inicio_atividade,
+    cnae: [j.cnae_fiscal, j.cnae_fiscal_descricao].filter(Boolean).join(" · "),
+    cidade: j.municipio, uf: j.uf, email: j.email,
+    socios: (j.qsa||[]).map(s=>({nome:s.nome_socio, qual:s.qualificacao_socio})),
+    fones: [j.ddd_telefone_1, j.ddd_telefone_2, j.ddd_fax].filter(Boolean),
+  };
+}
+function lerCnpjWs(j) {
+  const e = j.estabelecimento||{};
+  return {
+    cnpj: SO_DIG(e.cnpj), razao: j.razao_social, fantasia: e.nome_fantasia,
+    situacao: e.situacao_cadastral, abertura: e.data_inicio_atividade,
+    cnae: e.atividade_principal ? `${e.atividade_principal.subclasse||""} · ${e.atividade_principal.descricao||""}` : "",
+    cidade: e.cidade?.nome, uf: e.estado?.sigla, email: e.email,
+    socios: (j.socios||[]).map(s=>({nome:s.nome, qual:s.qualificacao_socio?.descricao})),
+    fones: [[e.ddd1,e.telefone1],[e.ddd2,e.telefone2],[e.ddd_fax,e.fax]]
+             .filter(([a,b])=>a&&b).map(([a,b])=>a+b),
+  };
+}
+const FONTES_CNPJ = [
+  { id:"brasilapi", nome:"BrasilAPI", url:(c)=>`https://brasilapi.com.br/api/cnpj/v1/${c}`, ler:lerBrasilApi },
+  { id:"cnpjws",    nome:"CNPJ.ws",   url:(c)=>`https://publica.cnpj.ws/cnpj/${c}`,       ler:lerCnpjWs    },
+];
+
+/* Nota 0–100 de WhatsApp provável, sempre com os motivos */
+function pontuarFones(emp, extras, vistos) {
+  const mapa = {};
+  const add = (raw, fonte) => {
+    const f = normFone(raw); if (!f) return;
+    (mapa[f.num] ||= {...f, fontes:new Set()}).fontes.add(fonte);
+  };
+  emp.fontes.forEach(({nome,fones})=>fones.forEach(r=>add(r,nome)));
+  extras.forEach(r=>add(r,"Manual"));
+  const contabil = /contab|contador|cont[áa]beis|escritorio/i.test(emp.email||"");
+  const ativa = /^ativa$/i.test(emp.situacao||"");
+  return Object.values(mapa).map(f => {
+    const mot = []; let n;
+    if (f.cel) { n=60; mot.push(["+","Celular — a maioria tem WhatsApp"]); }
+    else       { n=15; mot.push(["−","Fixo — só tem WhatsApp se for Business"]); }
+    if (f.fontes.size>1) { n+=15; mot.push(["+",`Confirmado em ${f.fontes.size} fontes`]); }
+    if (DDD_UF[emp.uf]?.includes(f.ddd)) { n+=10; mot.push(["+","DDD da cidade da empresa"]); }
+    else if (emp.uf) { n-=10; mot.push(["−",`DDD ${f.ddd} é de outro estado`]); }
+    const outros = (vistos[f.num]||[]).filter(c=>c.slice(0,8)!==emp.cnpj.slice(0,8)).length; // filiais não contam
+    if (outros>=1) { n-=40; mot.push(["−",`Aparece em ${outros+1} CNPJs que você pesquisou — provável contador`]); }
+    if (contabil && !f.fontes.has("Manual")) { n-=10; mot.push(["−","E-mail do cadastro parece de contabilidade"]); }
+    if (!ativa) { n-=30; mot.push(["−",`Empresa ${(emp.situacao||"sem situação").toLowerCase()}`]); }
+    n = Math.max(0, Math.min(100, n));
+    return {...f, fontes:[...f.fontes], nota:n, motivos:mot};
+  }).sort((a,b)=>b.nota-a.nota);
+}
+
+const LS = {
+  get:(k,d)=>{ try { return JSON.parse(localStorage.getItem(k))??d; } catch { return d; } },
+  set:(k,v)=>{ try { localStorage.setItem(k,JSON.stringify(v)); } catch {} },
+};
+const msgInicial = (emp) =>
+  `Olá! Encontrei o contato de ${emp.fantasia||emp.razao} no cadastro público de CNPJ da Receita Federal. ` +
+  `Trabalho com seguros e planejamento para médicos e gostaria de apresentar uma solução. ` +
+  `Se preferir não receber mensagens, é só responder SAIR que não entro mais em contato.`;
+
+function BuscaCNPJ({ onBack }) {
+  const [cnpj,setCnpj]   = useState("");
+  const [load,setLoad]   = useState(false);
+  const [err,setErr]     = useState("");
+  const [emp,setEmp]     = useState(null);
+  const [extra,setExtra] = useState("");
+  const [extras,setExtras] = useState([]);
+  const [hist,setHist]   = useState(()=>LS.get("medinss.cnpj.hist",[]));
+  const [vistos,setVistos] = useState(()=>LS.get("medinss.cnpj.fones",{}));
+  const [optout,setOpt]  = useState(()=>LS.get("medinss.cnpj.optout",[]));
+  const [copiado,setCop] = useState("");
+
+  const buscar = async (valor=cnpj) => {
+    const c = SO_DIG(valor);
+    setErr(""); setEmp(null); setExtras([]);
+    if (!cnpjValido(c)) { setErr("CNPJ inválido. Confira os 14 números."); return; }
+    setLoad(true);
+    const res = await Promise.all(FONTES_CNPJ.map(async f => {
+      try {
+        const r = await fetch(f.url(c));
+        if (r.status===404) return {f, nada:true};
+        if (!r.ok) return {f, erro:r.status===429?"limite de consultas atingido":`erro ${r.status}`};
+        return {f, dados:f.ler(await r.json())};
+      } catch { return {f, erro:"fora do ar ou sem conexão"}; }
+    }));
+    setLoad(false);
+    const ok = res.filter(r=>r.dados);
+    if (!ok.length) {
+      setErr(res.every(r=>r.nada) ? "CNPJ não encontrado na Receita Federal."
+        : "Não foi possível consultar agora: " + res.map(r=>`${r.f.nome} ${r.erro||"sem dados"}`).join("; ") + ". Tente de novo em alguns minutos.");
+      return;
+    }
+    const base = ok[0].dados;
+    const e = {...base, cnpj:c,
+      fontes: ok.map(r=>({nome:r.f.nome, fones:r.dados.fones})),
+      falhas: res.filter(r=>r.erro).map(r=>r.f.nome)};
+    const v = {...vistos};
+    e.fontes.forEach(({fones})=>fones.forEach(raw=>{
+      const f = normFone(raw); if (!f) return;
+      v[f.num] = [...new Set([...(v[f.num]||[]), c])];
+    }));
+    const h = [{cnpj:c, nome:e.fantasia||e.razao}, ...hist.filter(x=>x.cnpj!==c)].slice(0,10);
+    setVistos(v); LS.set("medinss.cnpj.fones",v);
+    setHist(h); LS.set("medinss.cnpj.hist",h);
+    setEmp(e);
+  };
+
+  const addExtra = () => {
+    if (!normFone(extra)) { setErr("Telefone inválido. Use DDD + número."); return; }
+    setErr(""); setExtras([...extras, extra]); setExtra("");
+  };
+  const marcarOpt = (num) => {
+    const o = optout.includes(num) ? optout.filter(x=>x!==num) : [...optout, num];
+    setOpt(o); LS.set("medinss.cnpj.optout",o);
+  };
+  const copiar = (txt, id) => { navigator.clipboard?.writeText(txt); setCop(id); setTimeout(()=>setCop(""),1500); };
+
+  const fones = emp ? pontuarFones(emp, extras, vistos).sort((a,b)=>optout.includes(a.num)-optout.includes(b.num)) : [];
+  const nivel = (n) => n>=70 ? ["Alta",T.green,T.greenBg] : n>=40 ? ["Média",T.amber,T.amberBg] : ["Baixa",T.slateL,T.dim];
+
+  return (
+    <div style={{minHeight:"100vh", background:T.bg, fontFamily:F, display:"flex", flexDirection:"column"}}>
+      <TopBar title="Busca CNPJ" sub="Telefones com WhatsApp provável" accentColor={T.wa} onBack={onBack}/>
+      <div style={{padding:24, maxWidth:960, width:"100%", margin:"0 auto"}}>
+        <Card style={{marginBottom:16}}>
+          <Label>CNPJ da clínica ou consultório</Label>
+          <div style={{display:"flex", gap:8, flexWrap:"wrap"}}>
+            <div style={{flex:"1 1 220px"}} onKeyDown={e=>e.key==="Enter"&&buscar()}>
+              <Input value={cnpj} onChange={e=>setCnpj(maskCnpj(e.target.value))} placeholder="00.000.000/0000-00"/>
+            </div>
+            <Btn color={T.wa} onClick={()=>buscar()} disabled={load}>{load?"Consultando…":"Buscar"}</Btn>
+          </div>
+          {err && <div style={{marginTop:10, fontSize:12, color:T.red, background:T.redBg, padding:"8px 12px", borderRadius:4}}>{err}</div>}
+          {hist.length>0 && (
+            <div style={{marginTop:14, display:"flex", gap:6, flexWrap:"wrap", alignItems:"center"}}>
+              <span style={{fontSize:11, color:T.muted}}>Recentes:</span>
+              {hist.map(x=>(
+                <Btn key={x.cnpj} variant="outline" small onClick={()=>{setCnpj(maskCnpj(x.cnpj)); buscar(x.cnpj);}}>
+                  {(x.nome||maskCnpj(x.cnpj)).slice(0,28)}
+                </Btn>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        {load && <Card><div style={{fontSize:13, color:T.textLt, animation:"pulse 1.4s infinite"}}>Consultando BrasilAPI e CNPJ.ws…</div></Card>}
+
+        {!emp && !load && !err && (
+          <Card style={{textAlign:"center", padding:40}}>
+            <div style={{fontSize:14, fontWeight:600, color:T.navy, marginBottom:6}}>Digite um CNPJ para começar</div>
+            <div style={{fontSize:12, color:T.textLt, lineHeight:1.6}}>
+              Os telefones vêm do cadastro público da Receita Federal e são ordenados pela chance de ter WhatsApp.
+            </div>
+          </Card>
+        )}
+
+        {emp && (
+          <div className="fade-in" style={{display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))", gap:16}}>
+            <Card>
+              <Label>Empresa</Label>
+              <div style={{fontSize:16, fontWeight:700, color:T.navy, marginBottom:2}}>{emp.fantasia||emp.razao}</div>
+              {emp.fantasia && <div style={{fontSize:12, color:T.textLt, marginBottom:8}}>{emp.razao}</div>}
+              <div style={{marginBottom:12}}>
+                <Badge color={/^ativa$/i.test(emp.situacao||"")?T.green:T.red} bg={/^ativa$/i.test(emp.situacao||"")?T.greenBg:T.redBg}>{emp.situacao||"sem situação"}</Badge>
+              </div>
+              {[["CNPJ",maskCnpj(emp.cnpj)],["Atividade",emp.cnae],["Cidade",[emp.cidade,emp.uf].filter(Boolean).join(" / ")],
+                ["Abertura",emp.abertura],["E-mail",emp.email]].filter(([,v])=>v).map(([l,v])=>(
+                <div key={l} style={{display:"flex", gap:10, fontSize:12, padding:"5px 0", borderBottom:`1px solid ${T.dim}`}}>
+                  <span style={{width:72, color:T.muted, flexShrink:0}}>{l}</span>
+                  <span style={{color:T.textMd, wordBreak:"break-word"}}>{v}</span>
+                </div>
+              ))}
+              {emp.socios.length>0 && <>
+                <Label style={{marginTop:16}}>Sócios</Label>
+                {emp.socios.map((s,i)=>(
+                  <div key={i} style={{fontSize:12, color:T.textMd, padding:"3px 0"}}>
+                    {s.nome} {s.qual && <span style={{color:T.muted}}>· {s.qual}</span>}
+                  </div>
+                ))}
+              </>}
+              <div style={{marginTop:14, fontSize:10, color:T.muted}}>
+                Fontes: {emp.fontes.map(f=>f.nome).join(", ")}{emp.falhas.length>0 && ` · indisponível: ${emp.falhas.join(", ")}`}
+              </div>
+            </Card>
+
+            <Card>
+              <Label>Telefones — do mais provável ao menos provável</Label>
+              {fones.length===0 && (
+                <div style={{fontSize:12, color:T.textLt, padding:"10px 0"}}>
+                  Nenhum telefone no cadastro. Procure no site, Google ou Instagram da clínica e adicione abaixo.
+                </div>
+              )}
+              {fones.map((f,i)=>{
+                const [lbl,c,bg] = nivel(f.nota);
+                const saiu = optout.includes(f.num);
+                return (
+                  <div key={f.num} style={{border:`1px solid ${i===0&&!saiu?T.greenBd:T.border}`, borderRadius:4, padding:12, marginBottom:8, opacity:saiu?.6:1}}>
+                    <div style={{display:"flex", alignItems:"center", gap:8, marginBottom:6, flexWrap:"wrap"}}>
+                      <span style={{fontSize:15, fontWeight:700, color:T.navy, fontFamily:"'Courier New',monospace"}}>{fmtFone(f.num)}</span>
+                      <Badge color={c} bg={bg}>{lbl} · {f.nota}</Badge>
+                      {saiu && <Badge color={T.red} bg={T.redBg}>Pediu para sair</Badge>}
+                    </div>
+                    <div style={{marginBottom:8}}>
+                      {f.motivos.map(([s,t],j)=>(
+                        <div key={j} style={{fontSize:11, color:s==="+"?T.green:T.slateL}}>{s} {t}</div>
+                      ))}
+                      <div style={{fontSize:10, color:T.muted, marginTop:2}}>Fonte: {f.fontes.join(", ")}</div>
+                    </div>
+                    <div style={{display:"flex", gap:6, flexWrap:"wrap"}}>
+                      <Btn small color={T.wa} disabled={saiu}
+                        onClick={()=>window.open(`https://wa.me/55${f.num}?text=${encodeURIComponent(msgInicial(emp))}`,"_blank","noopener")}>
+                        Abrir WhatsApp
+                      </Btn>
+                      <Btn small variant="outline" disabled={saiu} onClick={()=>window.open(`tel:+55${f.num}`)}>Ligar</Btn>
+                      <Btn small variant="ghost" onClick={()=>copiar(fmtFone(f.num), f.num)}>{copiado===f.num?"Copiado":"Copiar"}</Btn>
+                      <Btn small variant="ghost" color={saiu?T.textMd:T.red} onClick={()=>marcarOpt(f.num)}>
+                        {saiu?"Desfazer saída":"Pediu para sair"}
+                      </Btn>
+                    </div>
+                  </div>
+                );
+              })}
+              <Divider/>
+              <Label>Achou outro número? (site, Google, Instagram)</Label>
+              <div style={{display:"flex", gap:8}} onKeyDown={e=>e.key==="Enter"&&addExtra()}>
+                <Input value={extra} onChange={e=>setExtra(e.target.value)} placeholder="(11) 99999-9999"/>
+                <Btn variant="outline" onClick={addExtra}>Adicionar</Btn>
+              </div>
+              <div style={{marginTop:14, fontSize:10, color:T.muted, lineHeight:1.6}}>
+                A nota é uma estimativa: o sistema não consulta o WhatsApp. A mensagem pronta informa a origem do contato e
+                oferece a saída, como pede a LGPD. Quem pedir para sair fica bloqueado neste aparelho.
+              </div>
+            </Card>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════
    ROOT
 ══════════════════════════════════════════════════════ */
 export default function App() {
   const [tela, setTela] = useState("login");
   return (
     <>
+      <style>{GLOBAL_CSS}</style>
       {tela==="login"      && <Login       onLogin={()=>setTela("hub")} />}
       {tela==="hub"        && <Hub         onLogout={()=>setTela("login")} onGo={setTela} />}
       {tela==="prospeccao" && <Prospeccao  onBack={()=>setTela("hub")} />}
       {tela==="crm"        && <CRM         onBack={()=>setTela("hub")} />}
+      {tela==="cnpj"       && <BuscaCNPJ   onBack={()=>setTela("hub")} />}
     </>
   );
 }
