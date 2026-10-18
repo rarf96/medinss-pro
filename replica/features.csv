@@ -1,0 +1,19 @@
+feature,area,priority,original,clone,notes
+Buscar empresa por CNPJ com máscara e validação,busca,must,yes,yes,
+Ficha da empresa com dados cadastrais da Receita,ficha,must,yes,yes,
+Listar todos os telefones conhecidos da empresa,contatos,must,yes,yes,fonte: Receita (até 2) + fontes públicas
+Nota de WhatsApp provável por telefone com o motivo,contatos,must,unknown,yes,heurística própria: celular + fontes + DDD - telefone de contador
+Detectar telefone repetido em muitos CNPJs (contador),contatos,must,unknown,partial,só compara com CNPJs já pesquisados neste aparelho; base completa da Receita fica para depois
+Botão Abrir WhatsApp (wa.me) e Ligar,contatos,must,yes,yes,
+Registro de opt-out (não contatar de novo),lgpd,must,unknown,yes,exigência LGPD; não é do original
+Filtrar por especialidade (CNAE) e cidade,busca,should,yes,no,CNAE 8630-5 para clínicas e consultórios
+Busca de empresas no mapa por raio,busca,should,yes,no,"descrição da loja: ""buscador de empresas via API no mapa"""
+Mostrar sócios (QSA) da empresa,ficha,should,unknown,yes,o médico costuma ser o sócio
+Salvar empresa como lead,funil,should,yes,no,
+Histórico de buscas recentes,busca,should,unknown,yes,
+Cruzar com site/Google/Instagram da clínica,contatos,could,unknown,partial,adição manual do número; conta como fonte extra
+Exportar lista para planilha,funil,could,unknown,no,
+Mensagem inicial pronta dizendo a origem do contato,contatos,could,unknown,yes,ajuda na LGPD
+Base de leads da Villela,dados,could,yes,skip,dados pertencem à Villela
+Verificar se o número tem conta no WhatsApp,contatos,could,unknown,skip,só via ferramentas não oficiais; viola os termos do WhatsApp
+Disparo em massa no WhatsApp,contatos,could,unknown,skip,proibido pelos termos do WhatsApp; risco de banimento
